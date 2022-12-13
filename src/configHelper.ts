@@ -21,22 +21,17 @@ export class ConfigHelper {
 
   //This method will create the initial session token and invoke the getLatestConfig
   async [getInitialConfigToken]():Promise<LatestConfig> {
-    store.token = 'some Value';
-    console.log("orinting once");
     const response:StartConfigSession = await appconfig.startConfigurationSession(API_PARAMETER).promise();
     store.token = response.InitialConfigurationToken;
-    console.log("store.token insidie getInitialConfigToken ===" , store.token);
     const config:LatestConfig = await this[getLatestConfig]();
     return config;
   }
 
   async [getLatestConfig]():Promise<LatestConfig> {
-    console.log("this is main method");
     const params = {
       ConfigurationToken: store.token
     };
     const response:LatestConfig = await appconfig.getLatestConfiguration(params).promise();
-    console.log("response.NextPollConfigurationToken ===", response.NextPollConfigurationToken)
     store.token = response.NextPollConfigurationToken;
     return response;
   }
@@ -65,7 +60,6 @@ export class ConfigHelper {
       if (isTooManyRequest) {
         return await this[readConfigFile](configFilePath);
       }
-      console.log("store.token insidie getAppConfigInformation ===",store.token);
       const response = (!store.token) ? await this[getInitialConfigToken]() : await this[getLatestConfig]();
       store.lastinvoketime = new Date().getTime();
 
